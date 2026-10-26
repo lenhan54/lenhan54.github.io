@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Út trên tivi — bản công khai thử nghiệm</title>
+<style>
+body{margin:0;background:#1a2b4a;color:#fff;font-family:system-ui,sans-serif;text-align:center;overflow:hidden}
+#stage{height:70vh;display:flex;align-items:center;justify-content:center}
+#ut{position:relative;width:260px;height:340px;transition:transform .3s}
+#ut.jump{animation:j 1s infinite}@keyframes j{0%,100%{transform:translateY(0)}50%{transform:translateY(-28px)}}
+#ut.run{animation:r .4s infinite}@keyframes r{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+#ut.muaXoay{animation:spin 1.2s infinite}@keyframes spin{to{transform:rotate(360deg)}}
+#ut.lacDau{animation:shake .5s infinite}@keyframes shake{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+#ut.gatDau{animation:nod .8s infinite}@keyframes nod{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+#ut.ngoiChoi{transform:scale(.85) translateY(30px)}
+#ut.namNgu{transform:rotate(-90deg) translateY(40px)}
+#ut.cuiChao{transform:rotate(12deg) translateY(20px)}
+.face{position:absolute;left:55px;top:20px;width:150px;height:150px;background:#ffe0bd;border-radius:50%}
+.eyes{position:absolute;top:60px;left:30px;font-size:34px;width:90px;display:flex;justify-content:space-between}
+.brows{position:absolute;top:45px;left:28px;font-size:20px;width:95px;display:flex;justify-content:space-between}
+.mouth{position:absolute;top:105px;left:55px;font-size:30px}
+.cheeks{position:absolute;top:88px;left:12px;width:126px;display:flex;justify-content:space-between;font-size:20px;color:#ff8fa3}
+.hair{position:absolute;top:8px;left:65px;width:130px;height:55px;background:#4a2c1a;border-radius:50% 50% 20% 20%}
+.tuft{position:absolute;top:-8px;left:115px;font-size:28px}
+.shirt{position:absolute;top:170px;left:70px;width:120px;height:90px;background:#ffc93c;border-radius:20px}
+.star{position:absolute;top:190px;left:115px;font-size:32px;color:#fff}
+.star.glow{text-shadow:0 0 18px #fff,0 0 30px #ffd700}
+.shorts{position:absolute;top:260px;left:75px;width:110px;height:40px;background:#7fd8c0;border-radius:10px}
+.shoes{position:absolute;top:300px;left:70px;width:120px;display:flex;justify-content:space-between;font-size:26px}
+.arms{position:absolute;top:180px;left:45px;width:170px;display:flex;justify-content:space-between;font-size:36px}
+#ut.wave .arms{animation:w .6s infinite}@keyframes w{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+#ut.clap .arms{animation:c .4s infinite}@keyframes c{0%,100%{transform:scale(1)}50%{transform:scale(.85)}}
+#hat{position:absolute;top:-10px;left:70px;font-size:52px}
+#tail{position:absolute;top:250px;left:200px;font-size:42px}
+#cape{position:absolute;top:165px;left:45px;width:170px;height:120px;border-radius:20px;opacity:.9}
+#text{font-size:34px;font-weight:700;padding:0 20px;min-height:90px}
+#meta{font-size:16px;opacity:.85}
+#soundBtn{font-size:22px;padding:14px 26px;border-radius:14px;border:0;background:#ffc93c;cursor:pointer}
+#heart{font-size:44px;display:none}
+</style></head>
+<body>
+<div id="stage"><div id="ut">
+<div id="cape"></div>
+<div id="tail"></div>
+<div class="face"><div class="hair"></div><div class="tuft">〰</div>
+<div class="brows"><span id="browL">◠</span><span id="browR">◠</span></div>
+<div class="eyes"><span id="eyeL">●</span><span id="eyeR">●</span></div>
+<div class="cheeks"><span>●</span><span>●</span></div>
+<div class="mouth" id="mouth">◡</div></div>
+<div id="hat"></div>
+<div class="arms"><span id="armL">🖐</span><span id="armR">🖐</span></div>
+<div class="shirt"><div class="star" id="star">★</div></div>
+<div class="shorts"></div><div class="shoes"><span>👟</span><span>👟</span></div>
+</div></div>
+<div id="heart">❤️</div>
+<div id="text">Út đang chờ Anh Hai…</div>
+<div id="meta">Bản công khai thử nghiệm — không lưu dữ liệu của bé — máy chủ chỉ giữ 1 tin hiện tại</div>
+<p><button id="soundBtn">🔊 Bấm để bật tiếng cho Út</button></p>
+<div id="meta">Tin: <span id="mid">—</span> • Cảm xúc: <span id="emo">—</span> • Hành động: <span id="act">—</span> • Trang phục: <span id="out">—</span><br>Kiểm tra lần cuối: <span id="last">—</span></div>
+<audio id="player" preload="auto"></audio>
+<script>
+const EMO={
+vui:{eye:'●',mouth:'◡',brow:'◠'},cuoi:{eye:'◡',mouth:'‿',brow:'◠'},
+haoHung:{eye:'●',mouth:'○',brow:'◠'},yeuThuong:{eye:'♥',mouth:'◡',brow:'◠'},
+ngaiNgung:{eye:'●',mouth:'﹏',brow:'◠'},tuHao:{eye:'●',mouth:'◡',brow:'⌒'},
+toMo:{eye:'●',mouth:'o',brow:'◠'},ngacNhien:{eye:'◎',mouth:'○',brow:'⌒'},
+suyNghi:{eye:'●',mouth:'—',brow:'／'},hieuRoi:{eye:'●',mouth:'◡',brow:'◠'},
+tapTrung:{eye:'●',mouth:'—',brow:'—'},choDoi:{eye:'—',mouth:'◡',brow:'—'},
+buonNhe:{eye:'●',mouth:'︵',brow:'╮'},nho:{eye:'●',mouth:'︵',brow:'╮'},
+xinLoi:{eye:'●',mouth:'﹏',brow:'╮'},loLangNhe:{eye:'●',mouth:'﹏',brow:'╮'},
+buonNgu:{eye:'—',mouth:'◡',brow:'—'},met:{eye:'—',mouth:'—',brow:'—'},
+khichLe:{eye:'●',mouth:'◡',brow:'◠'},hoiHopVui:{eye:'●',mouth:'○',brow:'⌒'}};
+const HAT={none:'',dino:'🦖',catEars:'🐱',rabbitEars:'🐰',bearEars:'🐻',foxEars:'🦊',starCrown:'👑'};
+const TAIL={none:'',dino:'🦕',cat:'🐈',rabbit:'🐇',fox:'🦊'};
+let lastId=null, soundOn=false;
+document.getElementById('soundBtn').onclick=()=>{soundOn=true;document.getElementById('soundBtn').textContent='🔊 Đã bật tiếng';};
+function render(m){
+  const e=EMO[m.emotion]||EMO.vui;
+  document.getElementById('eyeL').textContent=e.eye;document.getElementById('eyeR').textContent=e.eye;
+  document.getElementById('mouth').textContent=e.mouth;
+  document.getElementById('browL').textContent=e.brow;document.getElementById('browR').textContent=e.brow;
+  document.getElementById('text').textContent=m.text||'';
+  document.getElementById('mid').textContent=m.messageId||'';document.getElementById('emo').textContent=m.emotion||'';
+  document.getElementById('act').textContent=m.action||'';
+  const o=m.outfit||{head:'none',cape:'none',tail:'none'};
+  document.getElementById('hat').textContent=HAT[o.head]||'';
+  document.getElementById('tail').textContent=TAIL[o.tail]||'';
+  const cape=document.getElementById('cape');
+  cape.style.background=(o.cape&&o.cape!=='none')?(o.capeColor||'#E23B3B'):'transparent';
+  document.getElementById('out').textContent=(o.head||'none')+' / '+(o.cape||'none')+' / '+(o.tail||'none');
+  document.getElementById('star').className='star'+(['tuHao','yeuThuong','vui'].includes(m.emotion)?' glow':'');
+  document.getElementById('heart').style.display=(m.action==='lamTim')?'block':'none';
+  const ut=document.getElementById('ut'); ut.className='';
+  if(m.action && m.action!=='none') ut.classList.add(m.action);
+  if(m.action==='moTayOm'){document.getElementById('armL').textContent='🤲';document.getElementById('armR').textContent='🤲';}
+  else if(m.action==='lamTim'){document.getElementById('armL').textContent='🫶';document.getElementById('armR').textContent='🫶';}
+  else if(m.action==='keBiMat'){document.getElementById('armL').textContent='🤫';document.getElementById('armR').textContent='🤫';}
+  else{document.getElementById('armL').textContent='🖐';document.getElementById('armR').textContent='🖐';}
+  if(m.audioUrl && soundOn){const p=document.getElementById('player');p.src=m.audioUrl;p.play().catch(()=>{});}
+}
+async function poll(){
+  try{
+    const r=await fetch('current.json?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok) throw new Error(r.status);
+    const m=await r.json();
+    document.getElementById('last').textContent=new Date().toLocaleTimeString('vi-VN');
+    if(m.messageId!==lastId){lastId=m.messageId;render(m);}
+  }catch(e){document.getElementById('last').textContent='lỗi '+e.message;}
+}
+poll(); setInterval(poll,2000);
+</script></body></html>
